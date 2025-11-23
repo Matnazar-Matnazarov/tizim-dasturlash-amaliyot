@@ -1,0 +1,5 @@
+1_topshiriq.py
+2_topshiriq.py
+3_topshiriq.py
+main.txt
+output.txt
