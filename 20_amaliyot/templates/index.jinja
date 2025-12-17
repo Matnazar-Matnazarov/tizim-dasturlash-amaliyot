@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-time System Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="max-w-6xl mx-auto py-10 px-4">
+        <header class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Real-time System Monitor</h1>
+                <p class="text-sm text-slate-400 mt-1">CPU yadrolari, RAM, tizim yuklamasi va internet tezligi bo‘yicha jonli statistikalar</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-slate-400">
+                <div class="text-right">
+                    <div class="uppercase tracking-wide text-[0.65rem] text-slate-500">STATUS</div>
+                    <div id="connection-status" class="font-medium text-emerald-400">Connected</div>
+                </div>
+                <div class="w-px h-8 bg-slate-700"></div>
+                <div class="text-right">
+                    <div class="uppercase tracking-wide text-[0.65rem] text-slate-500">LAST UPDATE</div>
+                    <div id="last-update">—</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="grid gap-6 lg:grid-cols-3">
+            <section class="lg:col-span-2 space-y-6">
+                <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-lg shadow-slate-900/40">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">CPU Overview</h2>
+                        <span class="text-[0.7rem] uppercase tracking-wide text-slate-500">Total</span>
+                    </div>
+                    <div class="flex items-end justify-between gap-4 mb-4">
+                        <div>
+                            <div class="text-4xl font-bold" id="cpu-percent-display">0%</div>
+                            <div class="text-xs text-slate-400 mt-1">Umumiy CPU foiz yuklama</div>
+                        </div>
+                    </div>
+                    <div class="w-full h-3 bg-slate-950/80 rounded-full overflow-hidden">
+                        <div id="cpu-bar" class="h-full bg-gradient-to-r from-emerald-400 via-emerald-500 to-lime-400 transition-all duration-300" style="width:0%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-3">Maʼlumotlar har 1 soniyada yangilanadi.</p>
+                </div>
+
+                <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-lg shadow-slate-900/40">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">CPU Cores</h2>
+                        <span class="text-[0.7rem] uppercase tracking-wide text-slate-500">Har bir yadro</span>
+                    </div>
+                    <div id="cpu-cores" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-xs"></div>
+                </div>
+            </section>
+
+            <section class="space-y-6">
+                <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 shadow-lg shadow-slate-900/40">
+                    <h2 class="text-lg font-semibold mb-3">Memory (RAM)</h2>
+                    <div class="flex items-baseline justify-between mb-3">
+                        <div>
+                            <div class="text-3xl font-bold" id="memory-percent-display">0%</div>
+                            <div class="text-xs text-slate-400 mt-1">Foydalanilayotgan RAM foizi</div>
+                        </div>
+                        <div class="text-right text-xs text-slate-400">
+                            <div><span id="memory-used"></span> / <span id="memory-total"></span></div>
+                        </div>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-950/80 rounded-full overflow-hidden">
+                        <div id="memory-bar" class="h-full bg-gradient-to-r from-sky-400 via-indigo-500 to-fuchsia-500 transition-all duration-300" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 shadow-lg shadow-slate-900/40">
+                    <h2 class="text-lg font-semibold mb-3">Load Average</h2>
+                    <div class="grid grid-cols-3 gap-3 text-xs">
+                        <div class="bg-slate-950/70 rounded-xl p-3 text-center border border-slate-800">
+                            <div class="text-slate-400 mb-1 text-[0.7rem] uppercase">1 min</div>
+                            <div id="load-1" class="text-xl font-semibold">0.00</div>
+                        </div>
+                        <div class="bg-slate-950/70 rounded-xl p-3 text-center border border-slate-800">
+                            <div class="text-slate-400 mb-1 text-[0.7rem] uppercase">5 min</div>
+                            <div id="load-5" class="text-xl font-semibold">0.00</div>
+                        </div>
+                        <div class="bg-slate-950/70 rounded-xl p-3 text-center border border-slate-800">
+                            <div class="text-slate-400 mb-1 text-[0.7rem] uppercase">15 min</div>
+                            <div id="load-15" class="text-xl font-semibold">0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 shadow-lg shadow-slate-900/40">
+                    <h2 class="text-lg font-semibold mb-3">Network (Internet)</h2>
+                    <div class="grid grid-cols-2 gap-3 text-xs mb-3">
+                        <div class="bg-slate-950/70 rounded-xl p-3 border border-emerald-500/30">
+                            <div class="text-emerald-300 mb-1 text-[0.7rem] uppercase">Upload</div>
+                            <div id="net-upload-speed" class="text-lg font-semibold">0 Mbps</div>
+                            <div class="text-slate-500 text-[0.7rem] mt-1">Joriy uzatish tezligi</div>
+                        </div>
+                        <div class="bg-slate-950/70 rounded-xl p-3 border border-sky-500/30">
+                            <div class="text-sky-300 mb-1 text-[0.7rem] uppercase">Download</div>
+                            <div id="net-download-speed" class="text-lg font-semibold">0 Mbps</div>
+                            <div class="text-slate-500 text-[0.7rem] mt-1">Joriy qabul qilish tezligi</div>
+                        </div>
+                    </div>
+                    <div class="text-[0.7rem] text-slate-500">
+                        Umumiy trafik:
+                        <span id="net-sent-total" class="text-emerald-300 font-medium">0 B</span>
+                        <span class="text-slate-600">↑</span>
+                        /
+                        <span id="net-recv-total" class="text-sky-300 font-medium">0 B</span>
+                        <span class="text-slate-600">↓</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function formatBytes(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatMbps(bytesPerSec) {
+            if (!bytesPerSec || bytesPerSec <= 0) return '0 Mbps';
+            const bitsPerSec = bytesPerSec * 8;
+            const mbps = bitsPerSec / (1024 * 1024);
+            return mbps.toFixed(2) + ' Mbps';
+        }
+
+        const cpuPercentDisplay = document.getElementById('cpu-percent-display');
+        const cpuBar = document.getElementById('cpu-bar');
+        const cpuCoresContainer = document.getElementById('cpu-cores');
+
+        const memoryPercentDisplay = document.getElementById('memory-percent-display');
+        const memoryBar = document.getElementById('memory-bar');
+        const memoryUsed = document.getElementById('memory-used');
+        const memoryTotal = document.getElementById('memory-total');
+
+        const load1 = document.getElementById('load-1');
+        const load5 = document.getElementById('load-5');
+        const load15 = document.getElementById('load-15');
+
+        const netUploadSpeed = document.getElementById('net-upload-speed');
+        const netDownloadSpeed = document.getElementById('net-download-speed');
+        const netSentTotal = document.getElementById('net-sent-total');
+        const netRecvTotal = document.getElementById('net-recv-total');
+
+        const connectionStatus = document.getElementById('connection-status');
+        const lastUpdate = document.getElementById('last-update');
+
+        let ws;
+        let coreElements = [];
+
+        function ensureCoreElements(coreCount) {
+            if (coreElements.length === coreCount) return;
+            cpuCoresContainer.innerHTML = '';
+            coreElements = [];
+
+            for (let i = 0; i < coreCount; i++) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'bg-slate-950/70 rounded-xl p-3 border border-slate-800 flex flex-col gap-2';
+
+                const header = document.createElement('div');
+                header.className = 'flex items-center justify-between text-[0.7rem]';
+                header.innerHTML = `
+                    <span class="uppercase tracking-wide text-slate-400">Core ${i}</span>
+                    <span id="core-${i}-value" class="font-semibold text-slate-100">0%</span>
+                `;
+
+                const barOuter = document.createElement('div');
+                barOuter.className = 'w-full h-2 bg-slate-900 rounded-full overflow-hidden';
+
+                const barInner = document.createElement('div');
+                barInner.id = `core-${i}-bar`;
+                barInner.className = 'h-full bg-gradient-to-r from-emerald-400 to-lime-400 transition-all duration-300';
+                barInner.style.width = '0%';
+
+                barOuter.appendChild(barInner);
+                wrapper.appendChild(header);
+                wrapper.appendChild(barOuter);
+
+                cpuCoresContainer.appendChild(wrapper);
+
+                coreElements.push({
+                    valueEl: header.querySelector(`#core-${i}-value`),
+                    barEl: barInner,
+                });
+            }
+        }
+
+        function connect() {
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            ws = new WebSocket(`${protocol}://${window.location.host}/ws/metrics`);
+
+            ws.onopen = () => {
+                connectionStatus.textContent = 'Connected';
+                connectionStatus.className = 'font-medium text-emerald-400';
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                const cpu = Math.round(data.cpu_percent || 0);
+                cpuPercentDisplay.textContent = cpu + '%';
+                cpuBar.style.width = Math.min(cpu, 100) + '%';
+
+                const cores = Array.isArray(data.cpu_per_core) ? data.cpu_per_core : [];
+                if (cores.length > 0) {
+                    ensureCoreElements(cores.length);
+                    cores.forEach((value, idx) => {
+                        if (!coreElements[idx]) return;
+                        const v = Math.round(value || 0);
+                        coreElements[idx].valueEl.textContent = v + '%';
+                        coreElements[idx].barEl.style.width = Math.min(v, 100) + '%';
+                    });
+                }
+
+                const memPercent = Math.round(data.memory_percent || 0);
+                memoryPercentDisplay.textContent = memPercent + '%';
+                memoryBar.style.width = Math.min(memPercent, 100) + '%';
+
+                memoryUsed.textContent = formatBytes(data.memory_used || 0);
+                memoryTotal.textContent = formatBytes(data.memory_total || 0);
+
+                load1.textContent = (data.load_1 || 0).toFixed(2);
+                load5.textContent = (data.load_5 || 0).toFixed(2);
+                load15.textContent = (data.load_15 || 0).toFixed(2);
+
+                netUploadSpeed.textContent = formatMbps(data.net_upload_bps || 0);
+                netDownloadSpeed.textContent = formatMbps(data.net_download_bps || 0);
+
+                netSentTotal.textContent = formatBytes(data.net_bytes_sent || 0);
+                netRecvTotal.textContent = formatBytes(data.net_bytes_recv || 0);
+
+                const now = new Date();
+                lastUpdate.textContent = now.toLocaleTimeString();
+            };
+
+            ws.onclose = () => {
+                connectionStatus.textContent = 'Disconnected – reconnecting...';
+                connectionStatus.className = 'font-medium text-amber-400';
+                setTimeout(connect, 2000);
+            };
+
+            ws.onerror = () => {
+                connectionStatus.textContent = 'Error';
+                connectionStatus.className = 'font-medium text-red-400';
+            };
+        }
+
+        connect();
+    </script>
+</body>
+</html>
